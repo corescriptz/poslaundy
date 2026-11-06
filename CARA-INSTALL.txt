@@ -1,0 +1,118 @@
+==============================================================
+  LAUNDRY POS — CARA INSTALL DI HOSTING cPanel (LiteSpeed)
+  Aplikasi PHP + MySQL, tanpa Node.js, tanpa composer.
+  Cukup: upload zip -> import sql -> edit config.php.
+==============================================================
+
+PERSYARATAN
+- Hosting cPanel dengan PHP 7.4 atau lebih baru (ekstensi
+  pdo_mysql aktif — sudah standar di hampir semua hosting).
+- MySQL / MariaDB (sudah termasuk di paket hosting cPanel).
+- Server LiteSpeed/Apache: tidak perlu setting khusus apa pun.
+
+--------------------------------------------------------------
+LANGKAH 1 — BUAT DATABASE DI cPANEL
+--------------------------------------------------------------
+1. Login cPanel -> menu "MySQL (R) Databases".
+2. Bagian "Create New Database": ketik nama, contoh: laundry
+   -> hasilnya jadi:  NAMAAKUN_laundry   (catat ini = DB NAME)
+3. Bagian "MySQL Users - Add New User": buat user + password
+   -> hasilnya jadi:  NAMAAKUN_user      (catat ini = DB USER,
+                         passwordnya    = DB PASS)
+4. Di bawahnya "Add User To Database": pilih user & database,
+   klik Add, centang ALL PRIVILEGES, klik Make Changes.
+
+--------------------------------------------------------------
+LANGKAH 2 — IMPORT FILE .sql LEWAT phpMyAdmin
+--------------------------------------------------------------
+1. cPanel -> menu "phpMyAdmin".
+2. Di panel kiri, KLIK nama database yang tadi dibuat
+   (NAMAAKUN_laundry) supaya terpilih/aktif.
+3. Tab "Import" -> Choose File -> pilih file "laundry-pos.sql"
+   (atau "database.sql" yang ada di dalam zip ini; isinya sama).
+4. Biarkan format SQL, klik "Go / Kirim".
+5. Selesai: akan muncul 3 tabel — packages, store_settings,
+   transactions (lengkap dengan data paket & info toko).
+
+--------------------------------------------------------------
+LANGKAH 3 — UPLOAD & EXTRACT APLIKASI
+--------------------------------------------------------------
+1. cPanel -> "File Manager" -> masuk ke folder public_html.
+2. Klik "Upload" -> unggah laundry-pos.zip.
+3. Klik kanan zip -> Extract -> extract ke:
+   - public_html/                (buka di https://domainanda.com)
+   - atau public_html/laundry/   (buka di https://domainanda.com/laundry/)
+
+--------------------------------------------------------------
+LANGKAH 4 — EDIT config.php  (PALING PENTING)
+--------------------------------------------------------------
+1. Di File Manager, buka file config.php -> klik kanan -> Edit.
+2. Ganti TIGA baris ini:
+
+      'db_name' => 'GANTI_NAMA_DATABASE',   ->  'NAMAAKUN_laundry'
+      'db_user' => 'GANTI_USER_DATABASE',   ->  'NAMAAKUN_user'
+      'db_pass' => 'GANTI_PASSWORD_DATABASE', ->  'passwordnya'
+
+   ('db_host' biarkan 'localhost', 'db_port' biarkan 3306.)
+3. Save. Buka aplikasi di browser — harusnya langsung jalan.
+
+--------------------------------------------------------------
+LANGKAH 5 — PAKAI APLIKASINYA
+--------------------------------------------------------------
+- Menu TRANSAKSI : pilih pelanggan, paket, jumlah (kg/pcs),
+  centang Express bila perlu, isi uang bayar, Simpan.
+  * "Lainnya" = layanan bebas: ketik nama & total sendiri.
+  * Angka "Total harga" boleh diganti manual sebelum simpan.
+  * Setelah simpan muncul tombol "Cetak Struk" (struk 80mm).
+- Menu LAPORAN  : statistik hari ini, grafik 7 hari, daftar
+  transaksi terakhir (bisa dihapus), dan tombol "Cetak laporan".
+- Menu PENGATURAN : nama/telp/alamat toko (muncul di struk &
+  laporan) serta harga paket normal & express, per kg/pcs.
+  Bisa juga menambah atau menghapus paket.
+- Nama kasir: klik tulisan "Kasir: Andi" di halaman transaksi.
+  Tersimpan otomatis di HP yang dipakai.
+
+--------------------------------------------------------------
+DATA AWAL YANG TERSEDAR
+--------------------------------------------------------------
+- Info toko contoh: "Laundry Kinanti" (ganti di Pengaturan).
+- 3 paket contoh: Cuci kering, Cuci setrika, Setrika saja.
+- +/- 128 transaksi contoh (untuk melihat laporan & grafik).
+
+Ingin mulai BERSIH tanpa transaksi contoh?
+- phpMyAdmin -> pilih database -> tab SQL -> jalankan:
+      TRUNCATE TABLE transactions;
+  (Nomor nota nanti mulai lagi dari A-1024; jika ingin
+  melanjutkan nomor lama, jangan dikosongkan.)
+
+--------------------------------------------------------------
+TROUBLESHOOTING
+--------------------------------------------------------------
+* Muncul "Belum bisa terhubung ke database"
+  -> berarti config.php belum benar. Periksa lagi db_name,
+     db_user, db_pass (huruf kecil/kapital harus sama persis),
+     dan pastikan user SUDAH di-add ke database (Langkah 1.4).
+* Halaman kosong / error 500
+  -> cPanel -> "Select PHP Version" / "MultiPHP Manager":
+     pilih PHP 7.4 ke atas, aktifkan ekstensi pdo_mysql.
+* Struk/laporan tidak otomatis muncul dialog cetak
+  -> izinkan pop-up untuk situs domain Anda di browser.
+* Ingin aplikasi tidak bisa dibuka sembarangan orang?
+  -> cPanel -> "Directory Privacy" -> beri password folder
+     aplikasi, atau simpan di subfolder yang hanya Anda tahu.
+* Disarankan aktifkan HTTPS (SSL Let's Encrypt di cPanel ->
+  SSL/TLS Status -> Run AutoSSL).
+
+--------------------------------------------------------------
+STRUKTUR FILE
+--------------------------------------------------------------
+config.php        <- satu-satunya file yang perlu diedit
+index.php         <- halaman transaksi (kasir)
+laporan.php       <- halaman laporan
+pengaturan.php    <- info toko & harga paket
+print/struk.php   <- halaman cetak struk 80mm
+print/laporan.php <- halaman cetak laporan harian
+inc/app.php       <- koneksi database & fungsi (tidak perlu diubah)
+assets/           <- tampilan & skrip (tidak perlu diubah)
+database.sql      <- struktur + data database (MySQL)
+.htaccess         <- proteksi kecil (boleh biarkan apa adanya)

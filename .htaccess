@@ -1,0 +1,15 @@
+# LaundryPOS — aturan akses (didukung Apache & LiteSpeed)
+Options -Indexes
+
+# Lindungi file database & catatan
+<FilesMatch "\.(sql|sqlite|db|log|md|ini)$">
+  <IfModule mod_authz_core.c>
+    Require all denied
+  </IfModule>
+  <IfModule !mod_authz_core.c>
+    Order allow,deny
+    Deny from all
+  </IfModule>
+</FilesMatch>
+
+AddDefaultCharset UTF-8
